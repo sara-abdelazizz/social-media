@@ -19,12 +19,14 @@ exports.userSchema = new mongoose_1.Schema({
     confirmEmailOtp: String,
     confirmEmailOtpExpiry: { type: Date },
     confirmedAt: Date,
+    changeCredentialsTime: Date,
     password: { type: String, required: true },
     resetpasswordOtp: String,
     phone: String,
     address: String,
     gender: { type: String, enum: Object.values(GenderEnum), default: GenderEnum.MALE },
     role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.USER },
+    profileImage: String
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 exports.userSchema.virtual("username").set(function (value) {
     const [firstName, lastName] = value.split(" ") || [];

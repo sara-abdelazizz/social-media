@@ -1,16 +1,73 @@
 import { Request, Response } from "express";
-
+import { LogoutDTO } from "./user.dto";
+import { createRevokeToken, LogoutEnum } from "../../Utils/security/token";
+import { JwtPayload } from "jsonwebtoken";
+import { UpdateQuery } from "mongoose";
+import { IUser, UserModel } from "../../DB/models/user.model";
+import { UserRepository } from "../../DB/repository/user.repository";
+import { fileUpload, uploadFiles } from "../../Utils/multer/s3.multer";
 
 class UserService {
+  private _userModel = new UserRepository(UserModel);
+  constructor() {}
 
-    constructor() { }
+  getProfile = async (req: Request, res: Response): Promise<Response> => {
+    return res.status(200).json({
+      message: "done",
+      data: { user: req.user, decoded: req.decoded },
+    });
+  };
 
-    getProfile = async (req: Request, res: Response): Promise<Response> => {
-    
+  logout = async (req: Request, res: Response): Promise<Response> => {
+    const { flag }: LogoutDTO = req.body;
+    let statusCode: number = 200;
+    const update: UpdateQuery<IUser> = {};
 
-        return res.status(200).json({ message: "done", data: { user: req.user, decoded: req.decoded } })
+    switch (flag) {
+      case LogoutEnum.ONLY:
+        await createRevokeToken(req.decoded as JwtPayload);
+        statusCode = 201;
+        break;
+      case LogoutEnum.ALL:
+        update.changeCredentialsTime = new Date();
+        break;
+      default:
+        break;
     }
+    await this._userModel.updateOne({
+      filter: { _id: req.decoded?._id },
+      update,
+    });
 
+    return res.status(statusCode).json({ message: "done" });
+  };
+
+  profileImage = async (req: Request, res: Response): Promise<Response> => {
+    // const Key = await fileUpload({
+    //   path: `users/${req.decoded?._id}`,
+    //   file: req.file as Express.Multer.File,
+    // });
+
+    const Key = await {
+      path: `users/${req.decoded?._id}`,
+      file: req.file as Express.Multer.File,
+    };
+    await this._userModel.updateOne({
+      filter: { _id: req.decoded?._id },
+      update: {
+        profileImage: Key,
+      },
+    });
+    return res.status(200).json({ message: "done" });
+  };
+
+  coverImage = async (req: Request, res: Response): Promise<Response> => {
+    const urls = await uploadFiles({
+      files: req.files as Express.Multer.File[],
+      path: `users/${req.decoded?._id}/cover`,
+    });
+    return res.status(200).json({ message: "done", urls });
+  };
 }
 
 export default new UserService();

@@ -1,8 +1,10 @@
 import { sign, verify, Secret, SignOptions, JwtPayload } from "jsonwebtoken"
 import { HUserDocument, RoleEnum, UserModel } from "../../DB/models/user.model";
 import { v4 as uuid } from "uuid"
-import { NotFoundExeption, UnauthorizedExeption } from "../response/err.response";
+import { BadRequestExeption, NotFoundExeption, UnauthorizedExeption } from "../response/err.response";
 import { UserRepository } from "../../DB/repository/user.repository";
+import { TokenModel } from "../../DB/models/token.models";
+import { TokenRepository } from "../../DB/repository/token.repository"
 
 
 export enum signitureLevelEnum {
@@ -13,6 +15,11 @@ export enum signitureLevelEnum {
 export enum TokenTypeEnum {
     ACCESS = "ACCESS",
     REFRESH = "REFRESH",
+}
+
+export enum LogoutEnum {
+    ALL = "ALL",
+    ONLY = "ONLY",
 }
 
 export const generateToken = async ({
@@ -107,6 +114,7 @@ export const decodedToken = async ({
 }) => {
 
     const userModel = new UserRepository(UserModel)
+    const tokenModel = new TokenRepository(TokenModel)
 
     const [bearer, token] = authorization.split(" ")
     if (!bearer || !token) throw new UnauthorizedExeption("missing token part")
@@ -123,9 +131,36 @@ export const decodedToken = async ({
     if (!decoded?._id || !decoded.iat)
         throw new UnauthorizedExeption("invalid token payload");
 
-    const user = await userModel.findById({ id: { _id: decoded._id } })
+
+    if (await tokenModel.findOne({ filter: { jti: decoded.jti as string } }))
+        throw new NotFoundExeption("invalid or old login credentials")
+
+
+    const user = await userModel.findOne({ filter: { _id: decoded._id } })
     if (!user) throw new NotFoundExeption("user not found")
 
+    if (user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000)
+        throw new UnauthorizedExeption("Logged Out From All Devices")
+
     return { user, decoded }
+
+}
+
+export const createRevokeToken = async (decoded: JwtPayload) => {
+    const tokenModel = new TokenRepository(TokenModel)
+
+    const [results] = await tokenModel.create({
+        data: [
+            {
+                jti: decoded.jti as string,
+                expiresIn: decoded.iat as number,
+                userId: decoded._id,
+            },
+        ],
+    }) || []
+
+    if (!results) throw new BadRequestExeption("Failed to revoke token")
+
+    return results
 
 }

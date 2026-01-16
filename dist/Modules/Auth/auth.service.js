@@ -43,17 +43,8 @@ class authinticationService {
             throw new err_response_1.BadRequestExeption("verify your account");
         if (!(await (0, hash_1.compareHash)(password, user.password)))
             throw new err_response_1.BadRequestExeption("invalid password");
-        const accessToken = await (0, token_1.generateToken)({
-            payload: { _id: user._id },
-            secret: "jididjaspodjqpodqdjwp",
-            options: { expiresIn: 3600 }
-        });
-        const refreshToken = await (0, token_1.generateToken)({
-            payload: { _id: user._id },
-            secret: "ifjsdfjwofwfjw0fefe",
-            options: { expiresIn: 3600 }
-        });
-        res.status(200).json({ message: "user loggedin successfully", data: { accessToken, refreshToken } });
+        const credentials = await (0, token_1.createLoginCredentials)(user);
+        res.status(200).json({ message: "user loggedin successfully", credentials });
     };
     confirmEmail = async (req, res) => {
         const { email, otp } = req.body;

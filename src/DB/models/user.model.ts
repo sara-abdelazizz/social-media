@@ -1,4 +1,5 @@
 import { HydratedDocument, model, models, Schema, Types } from "mongoose";
+import { string } from "zod";
 
 export enum GenderEnum {
     MALE = "MALE",
@@ -21,6 +22,7 @@ export interface IUser {
     confirmEmailOtp?: string;
     confirmedAt?: Date;
     confirmEmailOtpExpiry?: Date;
+    changeCredentialsTime: Date;
 
     password: string;
     resetpasswordOtp?: string;
@@ -29,6 +31,7 @@ export interface IUser {
     address?: string;
     gender?: GenderEnum;
     role: RoleEnum;
+    profileImage:string;
 
     createdAt?: Date;
     updatedAt?: Date;
@@ -42,12 +45,15 @@ export const userSchema = new Schema<IUser>(
         confirmEmailOtp: String,
         confirmEmailOtpExpiry: { type: Date },
         confirmedAt: Date,
+        changeCredentialsTime: Date,
+
         password: { type: String, required: true },
         resetpasswordOtp: String,
         phone: String,
         address: String,
         gender: { type: String, enum: Object.values(GenderEnum), default: GenderEnum.MALE },
         role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.USER },
+        profileImage:String
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 

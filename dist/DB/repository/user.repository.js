@@ -9,8 +9,8 @@ class UserRepository extends database_repository_1.DatabaseRepository {
         super(model);
         this.model = model;
     }
-    async createUser({ data = [], options = {} }) {
-        const [user] = (await this.create({ data, options }) || []);
+    async createUser({ data = [], options = {}, }) {
+        const [user] = (await this.create({ data, options })) || [];
         if (!user) {
             throw new err_response_1.BadRequestExeption("failed to signup");
         }

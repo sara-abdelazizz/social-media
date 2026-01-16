@@ -29,7 +29,7 @@ const bootstrap = async () => {
     app.use(limiter);
     await (0, connection_1.default)();
     app.use("/api/v1/auth", auth_controller_1.default);
-    app.use("/api/v1/users", user_controller_1.default);
+    app.use("/api/v1/user", user_controller_1.default);
     app.get("/", (req, res) => {
         res.status(200).json({ message: " welcome to social media app" });
     });
