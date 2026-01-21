@@ -19,4 +19,9 @@ router.patch("/profile-image", (0, authintication_middleware_1.authintication)(t
     storageApproach: cloud_multer_1.StorageEnum.MEMORY,
     maxSizeMb: 6,
 }).single("attachments"), user_service_1.default.profileImage);
+router.patch("/cover-image", (0, authintication_middleware_1.authintication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, cloud_multer_1.cloudFileUpload)({
+    validation: cloud_multer_1.fileValidation.images,
+    storageApproach: cloud_multer_1.StorageEnum.MEMORY,
+    maxSizeMb: 6,
+}).array("attachments", 5), user_service_1.default.coverImage);
 exports.default = router;

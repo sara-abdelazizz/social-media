@@ -23,12 +23,12 @@ var LogoutEnum;
     LogoutEnum["ALL"] = "ALL";
     LogoutEnum["ONLY"] = "ONLY";
 })(LogoutEnum || (exports.LogoutEnum = LogoutEnum = {}));
-const generateToken = async ({ payload, secret, options }) => {
+const generateToken = async ({ payload, secret, options, }) => {
     return await (0, jsonwebtoken_1.sign)(payload, secret, options);
 };
 exports.generateToken = generateToken;
 const verifyToken = async ({ token, secret, }) => {
-    return await (0, jsonwebtoken_1.verify)(token, secret);
+    return (await (0, jsonwebtoken_1.verify)(token, secret));
 };
 exports.verifyToken = verifyToken;
 const getSignitureLevel = async (role = user_model_1.RoleEnum.USER) => {
@@ -54,11 +54,13 @@ const getSigniture = async (signiturelevel = signitureLevelEnum.USER) => {
     switch (signiturelevel) {
         case signitureLevelEnum.ADMIN:
             signitures.access_token = process.env.TOKEN_ACCESS_ADMIN_SECRET;
-            signitures.refresh_token = process.env.TOKEN_REFRESH_ADMIN_SECRET;
+            signitures.refresh_token = process.env
+                .TOKEN_REFRESH_ADMIN_SECRET;
             break;
         case signitureLevelEnum.USER:
             signitures.access_token = process.env.TOKEN_ACCESS_USER_SECRET;
-            signitures.refresh_token = process.env.TOKEN_REFRESH_USER_SECRET;
+            signitures.refresh_token = process.env
+                .TOKEN_REFRESH_USER_SECRET;
         default:
             break;
     }
@@ -72,12 +74,12 @@ const createLoginCredentials = async (user) => {
     const access_token = await (0, exports.generateToken)({
         payload: { _id: user._id },
         secret: signitures.access_token,
-        options: { expiresIn: Number(process.env.ACCESS_TOKEN_EXIPIRE_IN), jwtid, }
+        options: { expiresIn: Number(process.env.ACCESS_TOKEN_EXIPIRE_IN), jwtid },
     });
     const refresh_token = await (0, exports.generateToken)({
         payload: { _id: user._id },
         secret: signitures.refresh_token,
-        options: { expiresIn: Number(process.env.REFRESH_TOKEN_EXIPIRE_IN), jwtid, }
+        options: { expiresIn: Number(process.env.REFRESH_TOKEN_EXIPIRE_IN), jwtid },
     });
     return { access_token, refresh_token };
 };
@@ -93,7 +95,7 @@ const decodedToken = async ({ authorization, tokenType = TokenTypeEnum.ACCESS, }
         token,
         secret: tokenType === TokenTypeEnum.REFRESH
             ? signitures.refresh_token
-            : signitures.access_token
+            : signitures.access_token,
     });
     if (!decoded?._id || !decoded.iat)
         throw new err_response_1.UnauthorizedExeption("invalid token payload");
@@ -109,7 +111,7 @@ const decodedToken = async ({ authorization, tokenType = TokenTypeEnum.ACCESS, }
 exports.decodedToken = decodedToken;
 const createRevokeToken = async (decoded) => {
     const tokenModel = new token_repository_1.TokenRepository(token_models_1.TokenModel);
-    const [results] = await tokenModel.create({
+    const [results] = (await tokenModel.create({
         data: [
             {
                 jti: decoded.jti,
@@ -117,7 +119,7 @@ const createRevokeToken = async (decoded) => {
                 userId: decoded._id,
             },
         ],
-    }) || [];
+    })) || [];
     if (!results)
         throw new err_response_1.BadRequestExeption("Failed to revoke token");
     return results;

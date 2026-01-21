@@ -5,7 +5,11 @@ import { JwtPayload } from "jsonwebtoken";
 import { UpdateQuery } from "mongoose";
 import { IUser, UserModel } from "../../DB/models/user.model";
 import { UserRepository } from "../../DB/repository/user.repository";
-import { fileUpload, uploadFiles } from "../../Utils/multer/s3.multer";
+import {
+  createPresignedUrl,
+  fileUpload,
+  uploadFiles,
+} from "../../Utils/multer/s3.multer";
 
 class UserService {
   private _userModel = new UserRepository(UserModel);
@@ -43,22 +47,24 @@ class UserService {
   };
 
   profileImage = async (req: Request, res: Response): Promise<Response> => {
-    // const Key = await fileUpload({
-    //   path: `users/${req.decoded?._id}`,
-    //   file: req.file as Express.Multer.File,
-    // });
+    const {
+      ContentType,
+      originalname,
+    }: { ContentType: string; originalname: string } = req.body;
 
-    const Key = await {
+    const { url, Key } = await createPresignedUrl({
+      ContentType,
+      originalname,
       path: `users/${req.decoded?._id}`,
-      file: req.file as Express.Multer.File,
-    };
+    });
+
     await this._userModel.updateOne({
       filter: { _id: req.decoded?._id },
       update: {
         profileImage: Key,
       },
     });
-    return res.status(200).json({ message: "done" });
+    return res.status(200).json({ message: "done", url, Key });
   };
 
   coverImage = async (req: Request, res: Response): Promise<Response> => {

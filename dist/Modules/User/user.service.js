@@ -35,9 +35,11 @@ class UserService {
         return res.status(statusCode).json({ message: "done" });
     };
     profileImage = async (req, res) => {
-        const Key = await (0, s3_multer_1.fileUpload)({
+        const { ContentType, originalname, } = req.body;
+        const { url, Key } = await (0, s3_multer_1.createPresignedUrl)({
+            ContentType,
+            originalname,
             path: `users/${req.decoded?._id}`,
-            file: req.file,
         });
         await this._userModel.updateOne({
             filter: { _id: req.decoded?._id },
@@ -45,7 +47,14 @@ class UserService {
                 profileImage: Key,
             },
         });
-        return res.status(200).json({ message: "done" });
+        return res.status(200).json({ message: "done", url, Key });
+    };
+    coverImage = async (req, res) => {
+        const urls = await (0, s3_multer_1.uploadFiles)({
+            files: req.files,
+            path: `users/${req.decoded?._id}/cover`,
+        });
+        return res.status(200).json({ message: "done", urls });
     };
 }
 exports.default = new UserService();

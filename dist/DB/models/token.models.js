@@ -6,7 +6,7 @@ exports.tokenSchema = new mongoose_1.Schema({
     jti: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     expiresIn: {
         type: Number,
@@ -15,7 +15,7 @@ exports.tokenSchema = new mongoose_1.Schema({
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
-        required: true
-    }
+        required: true,
+    },
 }, { timestamps: true });
 exports.TokenModel = mongoose_1.models.Token || (0, mongoose_1.model)("Token", exports.tokenSchema);
