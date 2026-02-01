@@ -11,6 +11,7 @@ const node_path_1 = __importDefault(require("node:path"));
 const dotenv_1 = require("dotenv");
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
 const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
+const post_controller_1 = __importDefault(require("./Modules/Post/post.controller"));
 const err_response_1 = require("./Utils/response/err.response");
 (0, dotenv_1.config)({ path: node_path_1.default.resolve("./config/.env.dev") });
 const connection_1 = __importDefault(require("./DB/connection"));
@@ -61,6 +62,7 @@ const bootstrap = async () => {
         return res.status(200).json({ message: "done", results });
     });
     app.use("/api/v1/auth", auth_controller_1.default);
+    app.use("/api/v1/post", post_controller_1.default);
     app.use("/api/v1/user", user_controller_1.default);
     app.get("/", (req, res) => {
         res.status(200).json({ message: " welcome to social media app" });

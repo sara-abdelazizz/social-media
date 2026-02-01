@@ -40,6 +40,57 @@ export abstract class DatabaseRepository<TDocument> {
     }
     return await doc.exec();
   }
+  async find({
+    filter,
+    select,
+    options,
+  }: {
+    filter?: QueryFilter<TDocument>;
+    select?: ProjectionType<TDocument> | null;
+    options?: QueryOptions<TDocument> | null;
+  }) {
+    const doc = this.model.find(filter || {}).select(select || "");
+    if (options?.populate) {
+      doc.populate(options.populate as PopulateOptions[]);
+    }
+    if (options?.limit) {
+      doc.limit(options?.limit);
+    }
+    if (options?.skip) {
+      doc.skip(options?.skip);
+    }
+    return await doc.exec();
+  }
+  async paginate({
+    filter = {},
+    select = {},
+    options = {},
+    page = 1,
+    size = 5,
+  }: {
+    filter?: QueryFilter<TDocument>;
+    select?: ProjectionType<TDocument> | undefined;
+    options?: QueryOptions<TDocument> | undefined;
+    page?: number;
+    size?: number;
+  }) {
+    let docsCount: number | undefined = undefined;
+    let pages: number | undefined = undefined;
+    page = Math.floor(page < 1 ? 1 : page);
+    options.limit = Math.floor(page < 1 || !size ? 5 : size);
+    options.skip = (page - 1) * options.limit;
+    docsCount = await this.model.countDocuments(filter);
+    pages = Math.ceil(docsCount / options.limit);
+
+    const results = await this.find({ filter, select, options });
+    return await {
+      docsCount,
+      pages,
+      limit: options.limit,
+      currentPage: page,
+      results,
+    };
+  }
   async findOneAndUpdate({
     filter,
     update,
@@ -99,7 +150,7 @@ export abstract class DatabaseRepository<TDocument> {
   }): Promise<DeleteResult> {
     return await this.model.deleteMany(filter);
   }
-    async findOneAndDelete({
+  async findOneAndDelete({
     filter,
   }: {
     filter: QueryFilter<TDocument>;

@@ -27,7 +27,7 @@ export interface IUser {
   firstName?: string;
   lastName: string;
   username?: string;
-  slug: string;
+  slug?: string;
 
   email: string;
   confirmEmailOtp?: string;
@@ -46,13 +46,14 @@ export interface IUser {
 
   createdAt?: Date;
   updatedAt?: Date;
+  friends?: Types.ObjectId[];
 }
 
 export const userSchema = new Schema<IUser>(
   {
     firstName: { type: String, required: true, minlength: 2, maxlength: 25 },
     lastName: { type: String, required: false, minlength: 2, maxlength: 25 },
-    slug: { type: String, required: true, minlength: 2, maxlength: 51 },
+    slug: { type: String, required: false, minlength: 2, maxlength: 51 },
 
     email: { type: String, required: true, unique: true },
     confirmEmailOtp: String,
@@ -74,6 +75,12 @@ export const userSchema = new Schema<IUser>(
       enum: Object.values(RoleEnum),
       default: RoleEnum.USER,
     },
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     profileImage: String,
   },
   {

@@ -17,7 +17,7 @@ var RoleEnum;
 exports.userSchema = new mongoose_1.Schema({
     firstName: { type: String, required: true, minlength: 2, maxlength: 25 },
     lastName: { type: String, required: false, minlength: 2, maxlength: 25 },
-    slug: { type: String, required: true, minlength: 2, maxlength: 51 },
+    slug: { type: String, required: false, minlength: 2, maxlength: 51 },
     email: { type: String, required: true, unique: true },
     confirmEmailOtp: String,
     confirmEmailOtpExpiry: { type: Date },
@@ -37,6 +37,12 @@ exports.userSchema = new mongoose_1.Schema({
         enum: Object.values(RoleEnum),
         default: RoleEnum.USER,
     },
+    friends: [
+        {
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: "User",
+        },
+    ],
     profileImage: String,
 }, {
     timestamps: true,

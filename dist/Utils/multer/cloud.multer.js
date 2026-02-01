@@ -16,7 +16,7 @@ var StorageEnum;
 exports.fileValidation = {
     images: ["image/jpg", "image/jpeg", "image/png"],
     pdf: ["application/pdf"],
-    doc: ["application/msword"]
+    doc: ["application/msword"],
 };
 const cloudFileUpload = ({ validation = [], storageApproach = StorageEnum.MEMORY, maxSizeMb = 2, }) => {
     const storage = storageApproach === StorageEnum.MEMORY
@@ -25,7 +25,7 @@ const cloudFileUpload = ({ validation = [], storageApproach = StorageEnum.MEMORY
             destination: node_os_1.default.tmpdir(),
             filename: (req, file, cb) => {
                 cb(null, `${(0, uuid_1.v4)()}-${file.originalname}`);
-            }
+            },
         });
     function fileFilter(req, file, cb) {
         if (!validation.includes(file.mimetype)) {
@@ -33,6 +33,10 @@ const cloudFileUpload = ({ validation = [], storageApproach = StorageEnum.MEMORY
         }
         return cb(null, true);
     }
-    return (0, multer_1.default)({ storage, fileFilter, limits: { fileSize: maxSizeMb * 1024 * 1024 } });
+    return (0, multer_1.default)({
+        storage,
+        fileFilter,
+        limits: { fileSize: maxSizeMb * 1024 * 1024 },
+    });
 };
 exports.cloudFileUpload = cloudFileUpload;

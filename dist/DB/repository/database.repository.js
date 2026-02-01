@@ -16,6 +16,36 @@ class DatabaseRepository {
         }
         return await doc.exec();
     }
+    async find({ filter, select, options, }) {
+        const doc = this.model.find(filter || {}).select(select || "");
+        if (options?.populate) {
+            doc.populate(options.populate);
+        }
+        if (options?.limit) {
+            doc.limit(options?.limit);
+        }
+        if (options?.skip) {
+            doc.skip(options?.skip);
+        }
+        return await doc.exec();
+    }
+    async paginate({ filter = {}, select = {}, options = {}, page = 1, size = 5, }) {
+        let docsCount = undefined;
+        let pages = undefined;
+        page = Math.floor(page < 1 ? 1 : page);
+        options.limit = Math.floor(page < 1 || !size ? 5 : size);
+        options.skip = (page - 1) * options.limit;
+        docsCount = await this.model.countDocuments(filter);
+        pages = Math.ceil(docsCount / options.limit);
+        const results = await this.find({ filter, select, options });
+        return await {
+            docsCount,
+            pages,
+            limit: options.limit,
+            currentPage: page,
+            results,
+        };
+    }
     async findOneAndUpdate({ filter, update, options, }) {
         const doc = this.model.findOneAndUpdate(filter, update);
         if (options?.populate) {

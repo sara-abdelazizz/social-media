@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generalaField = exports.validation = void 0;
 const err_response_1 = require("../Utils/response/err.response");
 const z = __importStar(require("zod"));
+const mongoose_1 = require("mongoose");
 const validation = (Schema) => {
     return (req, res, next) => {
         const validationErrors = [];
@@ -49,11 +50,13 @@ const validation = (Schema) => {
                     key,
                     issues: errors.issues.map((issue) => {
                         return { message: issue.message, path: issue.path };
-                    })
+                    }),
                 });
             }
             if (validationErrors.length > 0) {
-                throw new err_response_1.BadRequestExeption("validation error", { cause: validationErrors });
+                throw new err_response_1.BadRequestExeption("validation error", {
+                    cause: validationErrors,
+                });
             }
         }
         return next();
@@ -68,5 +71,23 @@ exports.generalaField = {
     email: z.email({ error: "Invalid email address" }),
     password: z.string(),
     confirmPassword: z.string(),
-    otp: z.string().regex(/^\d{6}$/)
+    otp: z.string().regex(/^\d{6}$/),
+    file: function (mimetype) {
+        return z
+            .strictObject({
+            fieldname: z.string(),
+            originalname: z.string(),
+            encoding: z.string(),
+            mimetype: z.enum(mimetype),
+            buffer: z.any().optional(),
+            path: z.string().optional(),
+            size: z.number(),
+        })
+            .refine((data) => {
+            return data.path || data.buffer;
+        }, { error: "Please provide a file" });
+    },
+    id: z.string().refine((data) => {
+        return mongoose_1.Types.ObjectId.isValid(data);
+    }, { error: "Invalid tag id" }),
 };

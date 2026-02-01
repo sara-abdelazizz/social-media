@@ -40,32 +40,34 @@ exports.loginSchema = {
     body: z.strictObject({
         email: validation_middleware_1.generalaField.email,
         password: validation_middleware_1.generalaField.password,
-    })
+    }),
 };
 exports.confirmEmailSchema = {
     body: z.strictObject({
         email: validation_middleware_1.generalaField.email,
         otp: validation_middleware_1.generalaField.otp,
-    })
+    }),
 };
 exports.signupSchema = {
-    body: exports.loginSchema.body.extend({
+    body: exports.loginSchema.body
+        .extend({
         username: validation_middleware_1.generalaField.username,
         confirmPassword: validation_middleware_1.generalaField.password,
-    }).superRefine((data, ctx) => {
+    })
+        .superRefine((data, ctx) => {
         if (data.password !== data.confirmPassword) {
             ctx.addIssue({
                 code: "custom",
                 message: "Passwords do not match",
-                path: ["confirmPassword"]
+                path: ["confirmPassword"],
             });
         }
         if (data.username?.split(" ").length != 2) {
             ctx.addIssue({
                 code: "custom",
                 message: "Username must contain first and last name",
-                path: ["username"]
+                path: ["username"],
             });
         }
-    })
+    }),
 };

@@ -7,6 +7,7 @@ import path from "node:path";
 import { config } from "dotenv";
 import authRouter from "./Modules/Auth/auth.controller";
 import userRouter from "./Modules/User/user.controller";
+import postRouter from "./Modules/Post/post.controller"
 import {
   BadRequestExeption,
   globalHandlerError,
@@ -20,8 +21,7 @@ import {
 } from "./Utils/multer/s3.multer";
 import { promisify } from "node:util";
 import { pipeline } from "node:stream";
-import {  UserModel } from "./DB/models/user.model";
-import { UserRepository } from "./DB/repository/user.repository";
+
 
 const createS3WriteStreamPipe = promisify(pipeline);
 
@@ -88,6 +88,7 @@ const bootstrap = async () => {
 
 
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/post", postRouter);
   app.use("/api/v1/user", userRouter);
 
   app.get("/", (req: Request, res: Response) => {
