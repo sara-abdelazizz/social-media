@@ -8,6 +8,7 @@ class UserService {
     _userModel = new user_repository_1.UserRepository(user_model_1.UserModel);
     constructor() { }
     getProfile = async (req, res) => {
+        await req.user?.populate("friends");
         return res.status(200).json({
             message: "done",
             data: { user: req.user, decoded: req.decoded },

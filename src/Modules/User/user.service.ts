@@ -7,7 +7,6 @@ import { IUser, UserModel } from "../../DB/models/user.model";
 import { UserRepository } from "../../DB/repository/user.repository";
 import {
   createPresignedUrl,
-  fileUpload,
   uploadFiles,
 } from "../../Utils/multer/s3.multer";
 
@@ -16,6 +15,7 @@ class UserService {
   constructor() {}
 
   getProfile = async (req: Request, res: Response): Promise<Response> => {
+   await req.user?.populate("friends")
     return res.status(200).json({
       message: "done",
       data: { user: req.user, decoded: req.decoded },

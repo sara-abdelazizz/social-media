@@ -6,8 +6,10 @@ import { RoleEnum } from "../../DB/models/user.model";
 import { validation } from "../../Middlewares/validation.middleware";
 import { logoutSchema } from "./user.validation";
 import { cloudFileUpload, fileValidation, StorageEnum } from "../../Utils/multer/cloud.multer";
+import chatRouter from "../Chat/chat.controller"
 
 const router: Router = Router();
+router.use("/:userId/chat" , chatRouter)
 
 router.get(
     "/profile",

@@ -11,7 +11,9 @@ const user_model_1 = require("../../DB/models/user.model");
 const validation_middleware_1 = require("../../Middlewares/validation.middleware");
 const user_validation_1 = require("./user.validation");
 const cloud_multer_1 = require("../../Utils/multer/cloud.multer");
+const chat_controller_1 = __importDefault(require("../Chat/chat.controller"));
 const router = (0, express_1.Router)();
+router.use("/:userId/chat", chat_controller_1.default);
 router.get("/profile", (0, authintication_middleware_1.authintication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.getProfile);
 router.post("/logout", (0, authintication_middleware_1.authintication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validation_middleware_1.validation)(user_validation_1.logoutSchema), user_service_1.default.logout);
 router.patch("/profile-image", (0, authintication_middleware_1.authintication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, cloud_multer_1.cloudFileUpload)({

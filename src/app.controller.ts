@@ -7,7 +7,7 @@ import path from "node:path";
 import { config } from "dotenv";
 import authRouter from "./Modules/Auth/auth.controller";
 import userRouter from "./Modules/User/user.controller";
-import postRouter from "./Modules/Post/post.controller"
+import postRouter from "./Modules/Post/post.controller";
 import {
   BadRequestExeption,
   globalHandlerError,
@@ -21,7 +21,7 @@ import {
 } from "./Utils/multer/s3.multer";
 import { promisify } from "node:util";
 import { pipeline } from "node:stream";
-
+import { intialize } from "./Modules/Gateway/gateway";
 
 const createS3WriteStreamPipe = promisify(pipeline);
 
@@ -38,7 +38,7 @@ const limiter = rateLimit({
 
 const bootstrap = async () => {
   const app: Express = express();
-  const port: number = Number(process.env.PORT) || 5000;
+  const port: number = Number(process.env.PORT) || 3000;
 
   app.use(cors(), express.json(), helmet());
   app.use(limiter);
@@ -85,24 +85,23 @@ const bootstrap = async () => {
     return res.status(200).json({ message: "done", results });
   });
 
+  app.use("/api/auth", authRouter);
+  app.use("/api/post", postRouter);
+  app.use("/api/user", userRouter);
 
-
-  app.use("/api/v1/auth", authRouter);
-  app.use("/api/v1/post", postRouter);
-  app.use("/api/v1/user", userRouter);
-
-  app.get("/", (req: Request, res: Response) => {
-    res.status(200).json({ message: " welcome to social media app" });
-  });
+  // app.get("/", (req: Request, res: Response) => {
+  //   res.status(200).json({ message: " welcome to social media app" });
+  // });
   app.use("{*dummy}", (req: Request, res: Response) => {
     res.status(404).json({ message: "Not found handler" });
   });
 
   app.use(globalHandlerError);
 
-  app.listen(port, () => {
+  const httpServer = app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
+  intialize(httpServer);
 };
 
 export default bootstrap;
