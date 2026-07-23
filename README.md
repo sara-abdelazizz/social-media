@@ -153,7 +153,7 @@ tsconfig.json
 Clone the repository
 
 ```bash
-git clone https://github.com/sara-abdelazizz/social-media
+git clone https://github.com/sara-abdelazizz/social-app-api
 ```
 
 Navigate to the project
